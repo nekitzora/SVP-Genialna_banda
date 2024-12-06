@@ -1,2 +1,0 @@
-a = "Hello";
-disp(a);
