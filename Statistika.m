@@ -205,12 +205,6 @@ disp('Údaje boli spracované a uložené.');
     stddev = sqrt(variance);
     xlswrite(filename, stddev, 'Charakteristiky', 'B9');
 
-    %disp("Arifmeticky priemer: " + x_avg + " vs " + mean(data));
-    %disp("Modus: " + mode_value + " vs " + mode(data));
-    %disp("Median: " + median_value + " vs " + median(data));
-    %disp("Rozptyl: " + variance + " vs " + var(data));
-    %disp("Smerodajna odchylka: " + stddev + " vs " + std(data));
-
     
    disp('Údaje boli spracované a uložené.');
     
