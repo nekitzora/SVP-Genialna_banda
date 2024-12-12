@@ -9,28 +9,7 @@ function Statistika()
             return;
        end
        
-    target = "Nadmorská výška sídla";
-
-    [~, firstRow] = xlsread(filename, 'VstupneData', '1:1');
-
-    found = -1;
-    column = 'A';
-    startRow = 2;
-
-    for i = 1:length(firstRow)
-
-        if strcmp(firstRow{i}, target)
-            found = i;
-            break;
-        end
-    end
-
-    if found == -1
-        uialert(app, 'Column "Nadmorská výška sídla" not found.', 'Charakteristika');
-        return;
-    else
-        column = char('A' + found - 1);
-    end
+    
 
     writetable(table(), filename, 'Sheet', 'VystupneData', 'WriteMode', 'overwrite');
 
@@ -132,8 +111,33 @@ function processData(app, filename, data, monthField, heightField, distanceField
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    target = "Nadmorská výška sídla";
+
+    [~, firstRow] = xlsread(filename, 'VstupneData', '1:1');
+
+    found = -1;
+    column = 'A';
+    
+
+    for i = 1:length(firstRow)
+
+        if strcmp(firstRow{i}, target)
+            found = i;
+            break;
+        end
+    end
+
+    if found == -1
+        uialert(app, 'Column "Nadmorská výška sídla" not found.', 'Charakteristika');
+        return;
+    else
+        column = char('A' + found - 1);
+    end
+
+
     data = [];
     %counter = 0;
+    startRow = 2;
 
     i = startRow;
 
