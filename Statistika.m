@@ -128,12 +128,12 @@ function processData(app, filename, data, monthField, heightField, distanceField
         end
     end
 
-    if found == -1
-        uialert(app, 'Column "Nadmorská výška sídla" not found.', 'Charakteristika');
-        return;
-    else
+    %if found == -1
+    %    uialert(app, 'Column "Nadmorská výška sídla" not found.', 'Charakteristika');
+    %    return;
+    %else
         column = char('A' + found - 1);
-    end
+    %end
 
 
     data = [];
