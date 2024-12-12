@@ -1,98 +1,24 @@
-function Statistika()  
-clear all;
-% Проверка наличия файла
-%filename = 'DataInput\SVP-Statistika67.xlsx';
-filename = 'SVP-Statistika.xlsx';
-if ~isfile(filename)
-    disp('Súbor SVP-Statistika.xlsx nie je k dispozícii.');
-    return;
-end
+function Statistika()
 
+    filename = 'DataInput\SVP-Statistika.xlsx';
 
-    
-% % Чтение данных из листа 'VstupneData' с сохранением оригинальных имен столбцов
-% opts = detectImportOptions(filename, 'Sheet', 'VstupneData');
-% opts.VariableNamingRule = 'preserve';  % Используем оригинальные имена столбцов
-% data = readtable(filename, opts, 'Sheet', 'VstupneData');
+    app = uifigure('Name', 'Statistika', 'Position', [100, 100, 400, 300]);
 
-% % Фильтрация и сортировка данных для первой таблицы (города с населением >= 50 000)
-% cities_large = data(data.('Počet obyvateľov sídla') >= 50000, :);
-% cities_large_sorted = sortrows(cities_large, 'Počet obyvateľov sídla', 'descend');
+        if ~isfile(filename)
+            uialert(app, 'Súbor SVP-Statistika.xlsx nie je k dispozícii.', 'Chyba');
+            return;
+       end
+       
+    target = "Nadmorská výška sídla";
 
-% % Фильтрация и сортировка данных для второй таблицы (города с населением < 1000)
-% cities_small = data(data.('Počet obyvateľov sídla') < 1000, :);
-% cities_small_sorted = sortrows(cities_small, 'Počet obyvateľov sídla', 'descend');
-
-% % Удаление ненужных столбцов
-% cities_large_sorted = removevars(cities_large_sorted, {'Priemerný mesačný úhrn zrážok', 'Priemerná mesačná teplota', 'Rozloha sídla', 'Najkratšia cestná vzdialenosť od Košíc'});
-% cities_small_sorted = removevars(cities_small_sorted, {'Priemerný mesačný úhrn zrážok', 'Priemerná mesačná teplota', 'Rozloha sídla', 'Najkratšia cestná vzdialenosť od Košíc'});
-
-% % Запись заголовков и первой таблицы в лист 'VystupneData'
-% header_large = {'Mesto s počtom obyvateľov > 50 000'};
-% writecell(header_large, filename, 'Sheet', 'VystupneData', 'Range', 'A1');
-% writetable(cities_large_sorted, filename, 'Sheet', 'VystupneData', 'Range', 'A2');
-
-% % Добавление пустой строки между таблицами
-% empty_row = cell(1, width(cities_large_sorted));  % Пустая строка
-% writecell(empty_row, filename, 'Sheet', 'VystupneData', 'Range', ['A' num2str(height(cities_large_sorted) + 2)]);
-
-% % Запись заголовков и второй таблицы в лист 'VystupneData'
-% header_small = {'Mesto s počtom obyvateľov < 1000'};
-% writecell(header_small, filename, 'Sheet', 'VystupneData', 'Range', ['A' num2str(height(cities_large_sorted) + height(empty_row) + 2)]);
-% writetable(cities_small_sorted, filename, 'Sheet', 'VystupneData', 'Range', ['A' num2str(height(cities_large_sorted) + height(empty_row) + 3)]);
-
-% % Запрос пользователя для выбора месяца и высоты
-% month = input('Zadajte mesiac (1-12): ');
-% height_limit = input('Zadajte nadmorskú výšku: ');
-
-% % Фильтрация данных по высоте
-% below_height = data.('Nadmorská výška sídla') < height_limit;
-% above_height = data.('Nadmorská výška sídla') > height_limit;
-
-% % Преобразование значений температуры и осадков для всех месяцев
-% temp_values = cellfun(@(x) str2double(strsplit(x, ',')), data.('Priemerná mesačná teplota'), 'UniformOutput', false);
-% precip_values = cellfun(@(x) str2double(strsplit(x, ',')), data.('Priemerný mesačný úhrn zrážok'), 'UniformOutput', false);
-
-% % Фильтрация данных для выбранного месяца
-% selected_month = month;  % Месяц, который выбрал пользователь
-
-% % Извлечение температур и осадков для выб % Извлечение температур и осадков для выбранного месяца
-% temp_for_month = cellfun(@(x) x(selected_month), temp_values);
-% precip_for_month = cellfun(@(x) x(selected_month), precip_values);
-
-% % Вычисление средней температуры и осадков для всех городов
-% avg_temp = mean(temp_for_month, 'omitnan');
-% avg_precip = mean(precip_for_month, 'omitnan');
-
-% % Результаты для выбранного месяца
-% results = {
-%     'Priemerná mesačná teplota pre vybraný mesiac:', avg_temp;
-%     'Priemerný mesačný úhrn zrážok pre vybraný mesiac:', avg_precip;
-% };
-
-% % Запись в Excel
-% writecell(results, filename, 'Sheet', 'VystupneData', ...
-%     'Range', ['A' num2str(height(cities_large_sorted) + height(cities_small_sorted) + 6)]);
-
-% disp('Údaje boli spracované a uložené.');
-
-
-
-
-    %folder = 'DataInput';
-    %filename = 'SVP-Statistika.xlsx';
-    %filePath = fullfile(folder, filename);
-
-    %if ~isfile(filename)
-    %   uialert(uifigure, 'Subor SVP-Statistika.xlsx neexestuje.', 'Chyba');
-    %    return;
-    target = "Nadmorská výška (m)";
     [~, firstRow] = xlsread(filename, 'VstupneData', '1:1');
-    found = -1;
 
+    found = -1;
     column = 'A';
     startRow = 2;
+
     for i = 1:length(firstRow)
+
         if strcmp(firstRow{i}, target)
             found = i;
             break;
@@ -100,11 +26,111 @@ end
     end
 
     if found == -1
-        disp('column not found');
+        uialert(app, 'Column "Nadmorská výška sídla" not found.', 'Charakteristika');
         return;
     else
         column = char('A' + found - 1);
     end
+
+    writetable(table(), filename, 'Sheet', 'VystupneData', 'WriteMode', 'overwrite');
+
+    opts = detectImportOptions(filename, 'Sheet', 'VstupneData');
+    opts.VariableNamingRule = 'preserve';
+    data = readtable(filename, opts, 'Sheet', 'VstupneData');
+
+    %app = uifigure('Name', 'Statistika', 'Position', [100, 100, 400, 300]);
+
+    uilabel(app, 'Position', [20, 240, 100, 22], 'Text', 'Mesiac (1-12):');
+    monthField = uieditfield(app, 'numeric', 'Position', [120, 240, 100, 22]);
+
+    uilabel(app, 'Position', [20, 200, 150, 22], 'Text', 'Nadmorská výška:');
+    heightField = uieditfield(app, 'numeric', 'Position', [120, 200, 100, 22]);
+
+    uilabel(app, 'Position', [20, 160, 200, 22], 'Text', 'Maximálna vzdialenosť (km):');
+    distanceField = uieditfield(app, 'numeric', 'Position', [120, 160, 100, 22]);
+
+    uButton = uibutton(app, 'Position', [150, 100, 100, 30], 'Text', 'Potvrdiť', ...
+        'ButtonPushedFcn', @(btn, event) processData(app, filename, data, monthField, heightField, distanceField));
+end
+
+function processData(app, filename, data, monthField, heightField, distanceField)
+
+    month = monthField.Value;
+    height_limit = heightField.Value;
+    distance_limit = distanceField.Value;
+
+        if isempty(month) || month < 1 || month > 12
+            uialert(app, 'Neplatný mesiac. Zadajte hodnotu medzi 1 a 12.', 'Chyba');
+            return;
+        end
+
+    cities_large = data(data.('Počet obyvateľov sídla') >= 50000, :);
+    cities_large_sorted = sortrows(cities_large, 'Počet obyvateľov sídla', 'descend');
+
+    cities_small = data(data.('Počet obyvateľov sídla') < 1000, :);
+    cities_small_sorted = sortrows(cities_small, 'Počet obyvateľov sídla', 'descend');
+
+    columns_to_remove = {'Priemerný mesačný úhrn zrážok', 'Priemerná mesačná teplota', ...
+        'Rozloha sídla', 'Najkratšia cestná vzdialenosť od Košíc', 'Nadmorská výška sídla'};
+
+    cities_large_sorted = removevars(cities_large_sorted, columns_to_remove);
+    cities_small_sorted = removevars(cities_small_sorted, columns_to_remove);
+
+    writecell({'S počtom obyvateľov > 50 000'}, filename, 'Sheet', 'VystupneData', 'Range', 'A1');
+    writetable(cities_large_sorted, filename, 'Sheet', 'VystupneData', 'Range', 'A2');
+
+    writecell({'S počtom obyvateľov < 1000'}, filename, 'Sheet', 'VystupneData', 'Range', ...
+        ['A' num2str(height(cities_large_sorted) + 4)]);
+    writetable(cities_small_sorted, filename, 'Sheet', 'VystupneData', 'Range', ...
+        ['A' num2str(height(cities_large_sorted) + 5)]);
+
+    below_height = data(data.('Nadmorská výška sídla') < height_limit, :);
+    above_height = data(data.('Nadmorská výška sídla') > height_limit, :);
+
+    temp_values = cellfun(@(x) str2double(strsplit(x, ',')), data.('Priemerná mesačná teplota'), 'UniformOutput', false);
+    precip_values = cellfun(@(x) str2double(strsplit(x, ',')), data.('Priemerný mesačný úhrn zrážok'), 'UniformOutput', false);
+
+    temp_for_month = cellfun(@(x) x(month), temp_values);
+    precip_for_month = cellfun(@(x) x(month), precip_values);
+
+    avg_temp_below = mean(temp_for_month(below_height.('Typ sídla') == "Mesto"), 'omitnan');
+    avg_precip_below = mean(precip_for_month(below_height.('Typ sídla') == "Mesto"), 'omitnan');
+
+    avg_temp_above = mean(temp_for_month(above_height.('Typ sídla') == "Obec"), 'omitnan');
+    avg_precip_above = mean(precip_for_month(above_height.('Typ sídla') == "Obec"), 'omitnan');
+
+    results_temp_precip = {
+        'Výsledky pre vybraný mesiac a výšku:', '';
+
+        'Priemerná teplota v mestách s výškou menšou ako zvolená:', avg_temp_below;
+        'Priemerný úhrn zrážok v mestách s výškou menšou ako zvolená:', avg_precip_below;
+
+        'Priemerná teplota v obciach s väčšou výškou ako zvolená:', avg_temp_above;
+        'Priemerný úhrn zrážok v obciach s väčšou výškou ako zvolená:', avg_precip_above;
+    };
+
+    writecell(results_temp_precip, filename, 'Sheet', 'VystupneData', ...
+        'Range', ['A' num2str(height(cities_large_sorted) + height(cities_small_sorted) + 10)]);
+
+        if ~isempty(distance_limit)
+
+            nearby_places = data(data.('Najkratšia cestná vzdialenosť od Košíc') < distance_limit, :);
+
+            columns_to_remove_distance = {'Priemerný mesačný úhrn zrážok', 'Priemerná mesačná teplota', 'Rozloha sídla', 'Nadmorská výška sídla', 'Počet obyvateľov sídla'};
+            nearby_places = removevars(nearby_places, columns_to_remove_distance);
+
+            writecell({'Sídla do zvolenej vzdialenosti'}, filename, 'Sheet', 'VystupneData', ...
+                'Range', ['A' num2str(height(cities_large_sorted) + height(cities_small_sorted) + 16)]);
+
+            writetable(nearby_places, filename, 'Sheet', 'VystupneData', ...
+                'Range', ['A' num2str(height(cities_large_sorted) + height(cities_small_sorted) + 17)]);
+        end
+
+    msgbox('Údaje boli spracované a uložené pre harok VystupneData.', ' ', 'help');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     data = [];
     %counter = 0;
@@ -124,7 +150,6 @@ end
         i = i + 1;
         %counter = counter + 1;
     end
-
 
     xlswrite(filename, {"Parametre"}, 'Charakteristiky', 'A1');
     xlswrite(filename, {'Hodnota'}, 'Charakteristiky', 'B1');
@@ -154,6 +179,7 @@ end
     Ni = zeros(1,m);
     Fi = zeros(1, m);
     a(1) = xmin;
+
     for i = 1:m
         if i > 1
             a(i) = b(i-1);
@@ -166,14 +192,17 @@ end
         end
         fi(i) = ni(i) / n; % Относительная частота
     end
+
     Ni = cumsum(ni); % Кумулятивная частота
     Fi = cumsum(fi); % Кумулятивная относительная частота
 
     % Арифметическое среднее
     x_avg = 0;
+
     for i = 1:m
         x_avg = x_avg + ni(i) * x(i);
     end
+
     x_avg = x_avg / n;
     xlswrite(filename, x_avg, 'Charakteristiky', 'B2');
 
@@ -198,6 +227,7 @@ end
     for i = 1:m
         variance = variance + ni(i) * (x(i) - x_avg)^2;
     end
+
     variance = variance / (n - 1);
     xlswrite(filename, variance, 'Charakteristiky', 'B8');
 
@@ -205,8 +235,14 @@ end
     stddev = sqrt(variance);
     xlswrite(filename, stddev, 'Charakteristiky', 'B9');
 
-    
-   disp('Údaje boli spracované a uložené.');
-    
+    %disp("Arifmeticky priemer: " + x_avg + " vs " + mean(data));
+    %disp("Modus: " + mode_value + " vs " + mode(data));
+    %disp("Median: " + median_value + " vs " + median(data));
+    %disp("Rozptyl: " + variance + " vs " + var(data));
+    %disp("Smerodajna odchylka: " + stddev + " vs " + std(data));
+
+    msgbox('Údaje boli spracované a uložené pre harok Charakteristiky.', ' ', 'help');
+
+    close(app);
 
 end
