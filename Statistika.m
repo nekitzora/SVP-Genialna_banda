@@ -1,16 +1,92 @@
 function Statistika()  
+clear all;
+% Проверка наличия файла
+%filename = 'DataInput\SVP-Statistika67.xlsx';
+filename = 'SVP-Statistika.xlsx';
+if ~isfile(filename)
+    disp('Súbor SVP-Statistika.xlsx nie je k dispozícii.');
+    return;
+end
 
-    clear all
+    
+% Чтение данных из листа 'VstupneData' с сохранением оригинальных имен столбцов
+opts = detectImportOptions(filename, 'Sheet', 'VstupneData');
+opts.VariableNamingRule = 'preserve';  % Используем оригинальные имена столбцов
+data = readtable(filename, opts, 'Sheet', 'VstupneData');
+
+% Фильтрация и сортировка данных для первой таблицы (города с населением >= 50 000)
+cities_large = data(data.('Počet obyvateľov sídla') >= 50000, :);
+cities_large_sorted = sortrows(cities_large, 'Počet obyvateľov sídla', 'descend');
+
+% Фильтрация и сортировка данных для второй таблицы (города с населением < 1000)
+cities_small = data(data.('Počet obyvateľov sídla') < 1000, :);
+cities_small_sorted = sortrows(cities_small, 'Počet obyvateľov sídla', 'descend');
+
+% Удаление ненужных столбцов
+cities_large_sorted = removevars(cities_large_sorted, {'Priemerný mesačný úhrn zrážok', 'Priemerná mesačná teplota', 'Rozloha sídla', 'Najkratšia cestná vzdialenosť od Košíc'});
+cities_small_sorted = removevars(cities_small_sorted, {'Priemerný mesačný úhrn zrážok', 'Priemerná mesačná teplota', 'Rozloha sídla', 'Najkratšia cestná vzdialenosť od Košíc'});
+
+% Запись заголовков и первой таблицы в лист 'VystupneData'
+header_large = {'Mesto s počtom obyvateľov > 50 000'};
+writecell(header_large, filename, 'Sheet', 'VystupneData', 'Range', 'A1');
+writetable(cities_large_sorted, filename, 'Sheet', 'VystupneData', 'Range', 'A2');
+
+% Добавление пустой строки между таблицами
+empty_row = cell(1, width(cities_large_sorted));  % Пустая строка
+writecell(empty_row, filename, 'Sheet', 'VystupneData', 'Range', ['A' num2str(height(cities_large_sorted) + 2)]);
+
+% Запись заголовков и второй таблицы в лист 'VystupneData'
+header_small = {'Mesto s počtom obyvateľov < 1000'};
+writecell(header_small, filename, 'Sheet', 'VystupneData', 'Range', ['A' num2str(height(cities_large_sorted) + height(empty_row) + 2)]);
+writetable(cities_small_sorted, filename, 'Sheet', 'VystupneData', 'Range', ['A' num2str(height(cities_large_sorted) + height(empty_row) + 3)]);
+
+% Запрос пользователя для выбора месяца и высоты
+month = input('Zadajte mesiac (1-12): ');
+height_limit = input('Zadajte nadmorskú výšku: ');
+
+% Фильтрация данных по высоте
+below_height = data.('Nadmorská výška sídla') < height_limit;
+above_height = data.('Nadmorská výška sídla') > height_limit;
+
+% Преобразование значений температуры и осадков для всех месяцев
+temp_values = cellfun(@(x) str2double(strsplit(x, ',')), data.('Priemerná mesačná teplota'), 'UniformOutput', false);
+precip_values = cellfun(@(x) str2double(strsplit(x, ',')), data.('Priemerný mesačný úhrn zrážok'), 'UniformOutput', false);
+
+% Фильтрация данных для выбранного месяца
+selected_month = month;  % Месяц, который выбрал пользователь
+
+% Извлечение температур и осадков для выб % Извлечение температур и осадков для выбранного месяца
+temp_for_month = cellfun(@(x) x(selected_month), temp_values);
+precip_for_month = cellfun(@(x) x(selected_month), precip_values);
+
+% Вычисление средней температуры и осадков для всех городов
+avg_temp = mean(temp_for_month, 'omitnan');
+avg_precip = mean(precip_for_month, 'omitnan');
+
+% Результаты для выбранного месяца
+results = {
+    'Priemerná mesačná teplota pre vybraný mesiac:', avg_temp;
+    'Priemerný mesačný úhrn zrážok pre vybraný mesiac:', avg_precip;
+};
+
+% Запись в Excel
+writecell(results, filename, 'Sheet', 'VystupneData', ...
+    'Range', ['A' num2str(height(cities_large_sorted) + height(cities_small_sorted) + 6)]);
+
+disp('Údaje boli spracované a uložené.');
+
+
+
 
     %folder = 'DataInput';
-    fileName = 'SVP-Statistika.xlsx';
-    %filePath = fullfile(folder, fileName);
+    %filename = 'SVP-Statistika.xlsx';
+    %filePath = fullfile(folder, filename);
 
-    %if ~isfile(fileName)
+    %if ~isfile(filename)
     %   uialert(uifigure, 'Subor SVP-Statistika.xlsx neexestuje.', 'Chyba');
     %    return;
     target = "Nadmorská výška (m)";
-    [~, firstRow] = xlsread(fileName, 'VstupneData', '1:1');
+    [~, firstRow] = xlsread(filename, 'VstupneData', '1:1');
     found = -1;
 
     column = 'A';
@@ -36,7 +112,7 @@ function Statistika()
 
     while true
         cellAdress = sprintf('%s%d', column, i);
-        num = xlsread(fileName, 'VstupneData', cellAdress);
+        num = xlsread(filename, 'VstupneData', cellAdress);
 
         if isempty(num)
             break;
@@ -49,24 +125,24 @@ function Statistika()
     end
 
 
-    xlswrite(fileName, {"Parametre"}, 'Charakteristiky', 'A1');
-    xlswrite(fileName, {'Hodnota'}, 'Charakteristiky', 'B1');
-    xlswrite(fileName, {'Aritmetický priemer'}, 'Charakteristiky', 'A2');
-    xlswrite(fileName, {'Modus'}, 'Charakteristiky', 'A3');
-    xlswrite(fileName, {'Medián'}, 'Charakteristiky', 'A4');
-    xlswrite(fileName, {'Maximum'}, 'Charakteristiky', 'A5');
-    xlswrite(fileName, {'Minimum'}, 'Charakteristiky', 'A6');
-    xlswrite(fileName, {'Variačné rozpätie'}, 'Charakteristiky', 'A7');
-    xlswrite(fileName, {'Rozptyl'}, 'Charakteristiky', 'A8');
-    xlswrite(fileName, {'Smerodajná odchýlka'}, 'Charakteristiky', 'A9');
+    xlswrite(filename, {"Parametre"}, 'Charakteristiky', 'A1');
+    xlswrite(filename, {'Hodnota'}, 'Charakteristiky', 'B1');
+    xlswrite(filename, {'Aritmetický priemer'}, 'Charakteristiky', 'A2');
+    xlswrite(filename, {'Modus'}, 'Charakteristiky', 'A3');
+    xlswrite(filename, {'Medián'}, 'Charakteristiky', 'A4');
+    xlswrite(filename, {'Maximum'}, 'Charakteristiky', 'A5');
+    xlswrite(filename, {'Minimum'}, 'Charakteristiky', 'A6');
+    xlswrite(filename, {'Variačné rozpätie'}, 'Charakteristiky', 'A7');
+    xlswrite(filename, {'Rozptyl'}, 'Charakteristiky', 'A8');
+    xlswrite(filename, {'Smerodajná odchýlka'}, 'Charakteristiky', 'A9');
 
     n = length(data);
     xmin = min(data);
-    xlswrite(fileName, xmin, 'Charakteristiky', 'B6');
+    xlswrite(filename, xmin, 'Charakteristiky', 'B6');
     xmax = max(data);
-    xlswrite(fileName, xmax, 'Charakteristiky', 'B5');
+    xlswrite(filename, xmax, 'Charakteristiky', 'B5');
     R = xmax - xmin;
-    xlswrite(fileName, R, 'Charakteristiky', 'B7');
+    xlswrite(filename, R, 'Charakteristiky', 'B7');
     m = ceil(sqrt(n));
     h = ceil(R/m);
 
@@ -98,7 +174,7 @@ function Statistika()
         x_avg = x_avg + ni(i) * x(i);
     end
     x_avg = x_avg / n;
-    xlswrite(fileName, x_avg, 'Charakteristiky', 'B2');
+    xlswrite(filename, x_avg, 'Charakteristiky', 'B2');
 
     % Мода
     [~, modeIndex] = max(ni);
@@ -106,7 +182,7 @@ function Statistika()
     d1 = (modeIndex > 1) * (ni(modeIndex) - ni(max(modeIndex - 1, 1)));
     d2 = (modeIndex < m) * (ni(modeIndex) - ni(min(modeIndex + 1, m)));
     mode_value = a_o + h * (d1 / (d1 + d2));
-    xlswrite(fileName, mode_value, 'Charakteristiky', 'B3');
+    xlswrite(filename, mode_value, 'Charakteristiky', 'B3');
 
     % Медиана
     medianTarget = n / 2;
@@ -114,7 +190,7 @@ function Statistika()
     a_e = a(medianIndex);
     N_prev = (medianIndex > 1) * Ni(medianIndex - 1);
     median_value = a_e + h * ((medianTarget - N_prev) / ni(medianIndex));
-    xlswrite(fileName, median_value, 'Charakteristiky', 'B4');
+    xlswrite(filename, median_value, 'Charakteristiky', 'B4');
 
     % Дисперсия(rozptyl)
     variance = 0;
@@ -122,11 +198,11 @@ function Statistika()
         variance = variance + ni(i) * (x(i) - x_avg)^2;
     end
     variance = variance / (n - 1);
-    xlswrite(fileName, variance, 'Charakteristiky', 'B8');
+    xlswrite(filename, variance, 'Charakteristiky', 'B8');
 
     % Стандартное отклонение
     stddev = sqrt(variance);
-    xlswrite(fileName, stddev, 'Charakteristiky', 'B9');
+    xlswrite(filename, stddev, 'Charakteristiky', 'B9');
 
     %disp("Arifmeticky priemer: " + x_avg + " vs " + mean(data));
     %disp("Modus: " + mode_value + " vs " + mode(data));
@@ -135,7 +211,7 @@ function Statistika()
     %disp("Smerodajna odchylka: " + stddev + " vs " + std(data));
 
     
-   
-    end
+   disp('Údaje boli spracované a uložené.');
+    
 
-    %data = readtable(filePath, 'Sheet', 'VstupneData');
+end
