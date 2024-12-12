@@ -12,6 +12,7 @@ function Statistika()
     
 
     writetable(table(), filename, 'Sheet', 'VystupneData', 'WriteMode', 'overwrite');
+    
 
     opts = detectImportOptions(filename, 'Sheet', 'VstupneData');
     opts.VariableNamingRule = 'preserve';
