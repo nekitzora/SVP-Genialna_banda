@@ -1,12 +1,25 @@
 function Matice()
-    % Generovanie náhodnej matice A
-    m = randi([2, 10]); % Náhodný počet riadkov (min 2, max 10)
-    n = randi([2, 10]); % Náhodný počet stĺpcov (min 2, max 10)
-    a = -100 + (200) * rand; % Dolná hranica intervalu
-    b = a + (100 - a) * rand; % Horná hranica intervalu
-    A = randi([floor(a), floor(b)], m, n); % Náhodná matica A
-    B = A * A'; % Matica B = A * A'
+    % Генерування випадкової матриці A з парною кількістю елементів
+    while true
+        m = randi([2, 10]); % Випадкова кількість рядків (мін 2, макс 10)
+        n = randi([2, 10]); % Випадкова кількість стовпців (мін 2, макс 10)
+        if mod(m * n, 2) == 0 % Перевірка: якщо кількість елементів парна, вийти з циклу
+            break;
+        end
+    end
     
+    % Генерування меж інтервалу
+    a = -100 + (200) * rand; % Нижня межа інтервалу
+    b = a + (100 - a) * rand; % Верхня межа інтервалу
+    
+    % Створення випадкової матриці A
+    A = randi([floor(a), floor(b)], m, n);
+    
+    % Транспонування матриці A
+    ATransposed = A';
+    
+    % Обчислення матриці B = A * A'
+    B = A * ATransposed;
     % Uloženie matíc do súboru Matice.txt
     dataInputPath = 'DataInput';
     if ~exist(dataInputPath, 'dir')
@@ -14,8 +27,19 @@ function Matice()
     end
     maticeFile = fullfile(dataInputPath, 'Matice.txt');
     fileID = fopen(maticeFile, 'w');
+    %
+    fprintf(fileID, 'n:\n');
+    fprintf(fileID, '%d ', n');
+    %
+    fprintf(fileID, 'm:\n');
+    fprintf(fileID, '%d ', m');
+    %
     fprintf(fileID, 'Hodnoty matice A:\n');
     fprintf(fileID, '%d ', A');
+    %%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(fileID, '\nHodnoty matice A*:\n');
+    fprintf(fileID, '%d ', ATransposed');
+    %%%%%%%%%%%%%%%%%%%%%%%%
     fprintf(fileID, '\n\nHodnoty matice B = A * A'':\n');
     fprintf(fileID, '%d ', B');
     fclose(fileID);
@@ -42,8 +66,12 @@ function Matice()
     fprintf(fileID, 'Hodnosť matice B: %d\n', hodnost);
     fprintf(fileID, 'Determinant matice B: %.2f\n', determinant);
     if isnumeric(inverzna)
-        fprintf(fileID, 'Inverzná matica B:\n');
-        fprintf(fileID, '%.2f ', inverzna');
+        if determinant == 0
+            fprintf(fileID, 'Inverzna Matica neexistuje');
+        else
+            fprintf(fileID, 'Inverzná matica B:\n');
+            fprintf(fileID, '%.5f ', inverzna');
+        end
     else
         fprintf(fileID, '%s\n', inverzna);
     end
@@ -52,4 +80,3 @@ function Matice()
     % Zobrazenie správy o úspešnom spracovaní
     msgbox('Spracovanie matíc bolo úspešné.', ' ', 'help');
 end
-
