@@ -1,1 +1,0 @@
-# SVP-Genialna_banda

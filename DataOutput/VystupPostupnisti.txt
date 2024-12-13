@@ -1,0 +1,9 @@
+Súčet prvých 10 členov: 10
+Súčet prvých 50 členov: 50
+Súčet prvých 100 členov: 100
+Súčet prvých 1000 členov: 1000
+Súčet prvých 10000 členov: 10000
+Súčet prvých 100000 členov: 100000
+Súčet prvých 1000000 členов: 1000000
+Súčet členov od am1 po am2: 9.000000
+Súčet S = P∞ neexistuje pre |q| >= 1.
